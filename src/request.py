@@ -1,11 +1,11 @@
-import json
+from json import loads
 from http.client import HTTPSConnection
 
 
 class Fetch():
 
     @staticmethod
-    def make_request(url, method,
+    def make_request(method, url,
                      lookup_data=None, host='api.ubiplaces.com.br'):
         """
         This function allows to make a request using the default host
@@ -16,7 +16,7 @@ class Fetch():
         connection.request(method, url)
 
         response = connection.getresponse()
-        data = json.loads(response.read())
+        data = loads(response.read())
 
         if lookup_data:
             data = data.get(lookup_data)
