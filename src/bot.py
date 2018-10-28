@@ -1,11 +1,17 @@
 import json
 import requests
 import urllib
+from datetime import date
+from request import Fetch
+from file_operations import CSVOperations
 
+
+URL = 'https://api.ubiplaces.com.br/is/imoveis?exibir=12&pagina=1'
 
 class UbiPlacesBot():
 
     TOKEN = "663551182:AAGECxo5uVIDF_Phurd2R--KEaxGCxCtItE"
+
     URL = "https://api.telegram.org/bot{}/".format(TOKEN)
 
     def get_url(self, url):
@@ -34,14 +40,6 @@ class UbiPlacesBot():
             update_ids.append(int(update["update_id"]))
         return max(update_ids)
 
-    def get_last_chat_id_and_text(self, updates):
-        num_updates = len(updates["result"])
-        last_update = num_updates - 1
-        text = updates["result"][last_update]["message"]["text"]
-        chat_id = updates["result"][last_update]["message"]["chat"]["id"]
-        return (text, chat_id)
-
-
     def send_message(self, text, chat_id):
         text = urllib.parse.quote_plus(text)
         url = self.URL + "sendMessage?text={}&chat_id={}".format(text, chat_id)
@@ -51,12 +49,25 @@ class UbiPlacesBot():
     def _text_analyser(text):
         if text == "/start":
             response = "Bem vindo. Irei fornecer informações " + \
-                       "sobre a quantidade de imóveis registrados na sua " + \
-                       "plataforma!"
+                       "sobre a quantidade de imóveis registrados na " + \
+                       "sua plataforma!"
+
+        elif text == "/fetch":
+            file_operator = CSVOperations()
+            total_imoveis = Fetch.make_request('GET', URL, 'total_imoveis')
+
+            file_operator.write_csv({
+                'dia': str(date.today()),
+                'total_imoveis': total_imoveis}
+            )
+            response = f'Quantidade de imóveis até o momento: {total_imoveis}'
+
         elif text == "/analyse":
-            response = "Quantidade de imóveis hoje: 41150"
+            response = ""
+
         else:
             response = "Descuple... Não entendi o que você disse :("
+
         return response
 
     def echo_all(self, updates):
