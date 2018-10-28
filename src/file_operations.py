@@ -1,4 +1,5 @@
 import csv
+import os.path
 
 
 class CSVOperations():
@@ -17,9 +18,14 @@ class CSVOperations():
             (default ['dia', 'total_imoveis'])
         """
 
+        file_exists = os.path.isfile(file_name)
+
         with open(file_name, 'a', newline='') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
-            writer.writeheader()
+            # writes header only once in the file
+            if not file_exists:
+                writer.writeheader()
+
             for observation in data:
                 writer.writerow(observation)
