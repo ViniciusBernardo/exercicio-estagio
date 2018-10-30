@@ -1,18 +1,17 @@
 import json
 import requests
 import urllib
-from datetime import date
-from request import Fetch
-from file_operations import CSVOperations
+from analytics import Analytic
 
-
-URL = 'https://api.ubiplaces.com.br/is/imoveis?exibir=12&pagina=1'
 
 class UbiPlacesBot():
 
     TOKEN = "663551182:AAGECxo5uVIDF_Phurd2R--KEaxGCxCtItE"
 
     URL = "https://api.telegram.org/bot{}/".format(TOKEN)
+
+    analytic = Analytic()
+
 
     def get_url(self, url):
         response = requests.get(url)
@@ -45,25 +44,23 @@ class UbiPlacesBot():
         url = self.URL + "sendMessage?text={}&chat_id={}".format(text, chat_id)
         self.get_url(url)
 
-    @staticmethod
-    def _text_analyser(text):
+    def _text_analyser(self, text):
         if text == "/start":
             response = "Bem vindo. Irei fornecer informações " + \
                        "sobre a quantidade de imóveis registrados na " + \
                        "sua plataforma!"
 
         elif text == "/fetch":
-            file_operator = CSVOperations()
-            total_imoveis = Fetch.make_request('GET', URL, 'total_imoveis')
-
-            file_operator.write_csv({
-                'dia': str(date.today()),
-                'total_imoveis': total_imoveis}
-            )
+            total_imoveis = self.analytic.fetch_data_api()
             response = f'Quantidade de imóveis até o momento: {total_imoveis}'
 
         elif text == "/analyse":
-            response = ""
+            analysis = self.analytic.analyse_past_days()
+
+            response = """
+                Quantidade de imóveis ontem ({yesterday}): {yesterday_total_imoveis}\n
+                Quantidade de imóveis hoje ({today}): {today_total_imoveis}
+            """.format(**analysis)
 
         else:
             response = "Descuple... Não entendi o que você disse :("
