@@ -58,8 +58,7 @@ class UbiPlacesBot():
             analysis = self.analytic.analyse_past_days()
 
             response = """
-                Quantidade de imóveis ontem ({yesterday}): {yesterday_total_imoveis}\n
-                Quantidade de imóveis hoje ({today}): {today_total_imoveis}
+                Quantidade de imóveis ontem ({yesterday}): {yesterday_total_imoveis}\n\nQuantidade de imóveis hoje ({today}): {today_total_imoveis}\n\n{variation_type}: {variation}%
             """.format(**analysis)
 
         else:
